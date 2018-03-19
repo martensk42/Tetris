@@ -1,0 +1,209 @@
+/*
+ * TCSS 305 – Autumn 2013
+ * Assignment 6 - Tetris
+ */
+
+package view;
+
+import controller.AbstractTetrisAction;
+
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Map;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+
+/**
+ * Represents a frame used to change the key bindings for the game.
+ * 
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class KeyBindingsFrame extends JFrame implements PropertyChangeListener {
+    
+    /**
+     * The number rows for the grid layout in the frame.
+     */
+    private static final int ROWS = 6;
+    
+    /**
+     * The number columns for the grid layout in the frame.
+     */
+    private static final int COLUMNS = 2;
+    
+    /**
+     * The instructions of how to change a key binding.
+     */
+    private static final String DEFAULT_INSTRUCTION = "To change a control simply delete "
+                                                        + "the current control, type a "
+                                                        + "new one, then press enter.";
+    
+    /**
+     * The text for the property change.
+     */
+    private static final String KEY_LISTENER_TEXT = "key pressed";
+    
+    /**
+     * The panel that draws the game board.
+     */
+    private final TetrisBoardPanel myBoardPanel;
+    
+    /**
+     * The current key bindings.
+     */
+    private final Map<String, AbstractTetrisAction> myKeyBindings;
+    
+    /**
+     * The new key stroke to be assigned.
+     */
+    private String myNewKey;
+    
+    /**
+     * Whether the property change has been fired.
+     */
+    private boolean myPropertyChangeFired;
+    
+    /**
+     * Constructs a new instance of the frame.
+     * 
+     * @param theTitle the title of the frame.
+     * @param theBoardPanel the panel containing the game board.
+     * @param theKeyBindings the key bindings.
+     */
+    public KeyBindingsFrame(final String theTitle, final TetrisBoardPanel theBoardPanel,
+                            final Map<String, AbstractTetrisAction> theKeyBindings) {
+        super(theTitle);
+        myBoardPanel = theBoardPanel;
+        myKeyBindings = theKeyBindings;
+        myPropertyChangeFired = false;
+        addPropertyChangeListener(this);
+        theBoardPanel.setRunning(false);
+        
+        setupComponents();
+    }
+    
+    /**
+     * Sets up the components for the frame.
+     */
+    private void setupComponents() {
+        final Box frameContent = new Box(BoxLayout.PAGE_AXIS);
+        final JPanel instructions = new JPanel();
+        
+        final JLabel instructionsLabel = new JLabel(DEFAULT_INSTRUCTION);
+        instructions.add(instructionsLabel);
+        
+        final JPanel controls = new JPanel();
+        controls.setLayout(new GridLayout(ROWS, COLUMNS));
+        addKeyControls(controls);
+        
+        final JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.setRunning(true);
+                dispose();
+            }
+        });
+        
+        frameContent.add(instructions);
+        frameContent.add(controls);
+        frameContent.add(closeButton);
+        
+        add(frameContent);
+        
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+        pack();
+        setLocationRelativeTo(null);
+    }
+    
+    /**
+     * adds the controls and their respective key bindings.
+     * 
+     * @param theControls the panel for the key controls.
+     */
+    private void addKeyControls(final JPanel theControls) {
+        for (final String description: myKeyBindings.keySet()) {
+            final JLabel label = new JLabel(description);
+            final JTextField textField = new JTextField(10);
+            final String keyControl = myKeyBindings.get(description).getActionName();
+            
+            textField.setText(keyControl.toLowerCase());
+            createActionListener(textField, description, keyControl);
+            createKeyListener(textField);
+            
+            theControls.add(label);
+            theControls.add(textField);
+        }
+    }
+    
+    /**
+     * Adds the action listener to the text field to change the key bindings.
+     * 
+     * @param theTextField the text field that displays the keyboard key.
+     * @param theDescription the "user friendly" description of the key binding.
+     * @param theKeyControl the current keyboard key used for the action.
+     */
+    private void createActionListener(final JTextField theTextField,
+                                      final String theDescription,
+                                      final String theKeyControl) {
+        theTextField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                if (myPropertyChangeFired) {
+                    myPropertyChangeFired = false;
+                    final KeyStroke keyStroke = KeyStroke.getKeyStroke("pressed " + myNewKey);
+                    myBoardPanel.setNewKeyBinding(theDescription,
+                                                  KeyStroke.getKeyStroke(theKeyControl),
+                                                  keyStroke);
+                    theTextField.setText(myNewKey.toLowerCase());
+                }
+            }
+        });
+    }
+    
+    /**
+     * Adds the key listener to let the user select their own key binding.
+     * 
+     * @param theTextField the text field for the user to type in.
+     */
+    private void createKeyListener(final JTextField theTextField) {
+        theTextField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(final KeyEvent theEvent) {
+                final String key = KeyEvent.getKeyText(theEvent.getKeyCode());
+                firePropertyChange(KEY_LISTENER_TEXT, myNewKey, key);
+                myPropertyChangeFired = true;
+            }
+
+            @Override
+            public void keyReleased(final KeyEvent theEvent) { }
+            @Override
+            public void keyTyped(final KeyEvent theEvent) { }
+        });
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent) {
+        if (KEY_LISTENER_TEXT.equals(theEvent.getPropertyName())
+                && !"Enter".equals(theEvent.getNewValue())) {
+            myNewKey = (String) theEvent.getNewValue();
+        }
+    }
+}

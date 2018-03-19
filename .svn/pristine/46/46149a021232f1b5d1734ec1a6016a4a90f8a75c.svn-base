@@ -1,0 +1,84 @@
+/*
+ * 
+ */
+package view;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+
+import model.Board;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class TetrisMenuBar extends JMenuBar {
+    
+    /**
+     * 
+     */
+    private JMenu myGameMenu;
+    
+    /**
+     * 
+     */
+    private JMenu myOptionsMenu;
+    
+    /**
+     * 
+     */
+    private JMenu myHelpMenu;
+    
+    /**
+     * 
+     */
+    private Board myBoard;
+    
+    /**
+     * 
+     * @param theBoard 
+     */
+    public TetrisMenuBar(final Board theBoard) {
+        super();
+        myGameMenu = new JMenu("Game");
+        myOptionsMenu = new JMenu("Options");
+        myHelpMenu = new JMenu("Help");
+        myBoard = theBoard;
+        
+        setupComponents();
+    }
+    
+    /**
+     * 
+     */
+    private void setupComponents() {
+        createGameMenu();
+        createOptionsMenu();
+        createHelpMenu();
+    }
+    
+    /**
+     * 
+     */
+    private void createGameMenu() {
+        
+        add(myGameMenu);
+    }
+    
+    /**
+     * 
+     */
+    private void createOptionsMenu() {
+        
+        add(myOptionsMenu);
+    }
+    
+    /**
+     * 
+     */
+    private void createHelpMenu() {
+        
+        add(myHelpMenu);
+    }
+}

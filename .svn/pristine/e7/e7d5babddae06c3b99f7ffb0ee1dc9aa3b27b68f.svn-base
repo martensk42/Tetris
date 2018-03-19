@@ -1,0 +1,32 @@
+/**
+ * 
+ */
+
+package Controller;
+
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+
+
+/**
+ * 
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class TetrisAction extends AbstractAction {
+    
+    /**
+     * 
+     */
+    public TetrisAction() {
+        
+    }
+    
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        System.out.println("key pressed");        
+    }
+    
+}

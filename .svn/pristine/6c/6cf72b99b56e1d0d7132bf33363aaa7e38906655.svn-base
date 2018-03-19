@@ -1,0 +1,39 @@
+/**
+ * 
+ */
+
+package Controller;
+
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+
+
+/**
+ * 
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public abstract class AbstractTetrisAction extends AbstractAction {
+    
+    /**
+     * 
+     */
+    private String myActionName;
+    
+    /**
+     * 
+     * @param theName 
+     */
+    public AbstractTetrisAction(final String theName) {
+        myActionName = theName;
+    }
+    
+    /**
+     * @return 
+     */
+    public String getActionName() {
+        return myActionName;
+    }
+}

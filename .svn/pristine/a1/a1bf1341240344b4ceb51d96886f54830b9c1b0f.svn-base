@@ -1,0 +1,189 @@
+/*
+ * 
+ */
+package view;
+
+import controller.AbstractTetrisAction;
+
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Map;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class KeyBindingsFrame extends JFrame implements PropertyChangeListener {
+    
+    /**
+     * 
+     */
+    private static final int ROWS = 6;
+    
+    /**
+     * 
+     */
+    private static final int COLUMNS = 2;
+    
+    /**
+     * 
+     */
+    private static final String DEFAULT_INSTRUCTION = "To change a control simply delete "
+                                                        + "the current control, type a "
+                                                        + "new one, then press enter.";
+    
+    /**
+     * 
+     */
+    private static final String KEY_LISTENER_TEXT = "key pressed";
+    
+    /**
+     * 
+     */
+    private final TetrisBoardPanel myBoardPanel;
+    
+    /**
+     * 
+     */
+    private final Map<String, AbstractTetrisAction> myKeyBindings;
+    
+    /**
+     * 
+     */
+    private String myNewKey;
+    
+    /**
+     * 
+     */
+    private boolean myPropertyChangeFired;
+    
+    /**
+     * 
+     * @param theTitle 
+     * @param theBoardPanel 
+     * @param theKeyBindings 
+     */
+    public KeyBindingsFrame(final String theTitle, final TetrisBoardPanel theBoardPanel,
+                            final Map<String, AbstractTetrisAction> theKeyBindings) {
+        super(theTitle);
+        myBoardPanel = theBoardPanel;
+        myKeyBindings = theKeyBindings;
+        myPropertyChangeFired = false;
+        addPropertyChangeListener(this);
+        
+        setupComponents();
+    }
+    
+    /**
+     * 
+     */
+    private void setupComponents() {
+        final Box frameContent = new Box(BoxLayout.PAGE_AXIS);
+        final JPanel instructions = new JPanel();
+        
+        final JLabel instructionsLabel = new JLabel(DEFAULT_INSTRUCTION);
+        instructions.add(instructionsLabel);
+        
+        final JPanel controls = new JPanel();
+        controls.setLayout(new GridLayout(ROWS, COLUMNS));
+        addKeyControls(controls);
+        
+        frameContent.add(instructions);
+        frameContent.add(controls);
+        
+        add(frameContent);
+        
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+        pack();
+        setLocationRelativeTo(null);
+    }
+    
+    /**
+     * 
+     */
+    private void addKeyControls(final JPanel theControls) {
+        for (final String description: myKeyBindings.keySet()) {
+            final JLabel label = new JLabel(description);
+            final JTextField textField = new JTextField(10);
+            final String keyControl = myKeyBindings.get(
+                description).getActionName();
+            
+            textField.setText(keyControl.toLowerCase());
+            createActionListener(textField, description, keyControl);
+            createKeyListener(textField);
+            
+            theControls.add(label);
+            theControls.add(textField);
+        }
+    }
+    
+    /**
+     * 
+     * @param theTextField 
+     * @param theDescription 
+     * @param theKeyControl 
+     */
+    private void createActionListener(final JTextField theTextField,
+                                      final String theDescription,
+                                      final String theKeyControl) {
+        theTextField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                if (myPropertyChangeFired) {
+                    myPropertyChangeFired = false;
+                    final KeyStroke keyStroke = KeyStroke.getKeyStroke(myNewKey);
+                    myBoardPanel.setNewKeyBinding(theDescription,
+                                                  KeyStroke.getKeyStroke(theKeyControl),
+                                                  keyStroke);
+                    theTextField.setText(myNewKey.toLowerCase());
+                }
+            }
+        });
+    }
+    
+    /**
+     * 
+     * @param theTextField 
+     */
+    private void createKeyListener(final JTextField theTextField) {
+        theTextField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(final KeyEvent theEvent) {
+                final String key = KeyEvent.getKeyText(theEvent.getKeyCode());
+                firePropertyChange(KEY_LISTENER_TEXT, myNewKey, key);
+                myPropertyChangeFired = true;
+            }
+
+            @Override
+            public void keyReleased(final KeyEvent theEvent) { }
+            @Override
+            public void keyTyped(final KeyEvent theEvent) { }
+        });
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent) {
+        if (KEY_LISTENER_TEXT.equals(theEvent.getPropertyName())
+                && !"Enter".equals(theEvent.getNewValue())) {
+            myNewKey = (String) theEvent.getNewValue();
+        }
+    }
+}

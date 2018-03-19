@@ -1,0 +1,216 @@
+/*
+ * 
+ */
+package view;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.Timer;
+
+import model.Board;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class TetrisMenuBar extends JMenuBar implements Observer {
+    
+    /**
+     * 
+     */
+    private static final String SCORING_SYSTEM = "You must complete lines to gain points.\n"
+            + "You gain 10 points per line, multiplied by the level. This means that if\n"
+            + "you are on level 4 and you clear a line, you will get 40 points.\n\n"
+            + "You progress levels by getting points up through the set:\n";
+    
+    /**
+     * 
+     */
+    private JMenu myGameMenu;
+    
+    /**
+     * 
+     */
+    private JMenu myOptionsMenu;
+    
+    /**
+     * 
+     */
+    private JMenu myHelpMenu;
+    
+    /**
+     * 
+     */
+    private TetrisBoardPanel myBoardPanel;
+    
+    /**
+     * 
+     */
+    private Timer myTimer;
+    
+    /**
+     * 
+     */
+    private JMenuItem myNewGame;
+    
+    /**
+     * 
+     */
+    private JMenuItem myEndGame;
+    
+    /**
+     * 
+     */
+    private JCheckBoxMenuItem myBlindMode;
+    
+    /**
+     * 
+     * @param theBoardPanel 
+     * @param theTimer 
+     */
+    public TetrisMenuBar(final TetrisBoardPanel theBoardPanel, final Timer theTimer) {
+        super();
+        myGameMenu = new JMenu("Game");
+        myOptionsMenu = new JMenu("Options");
+        myHelpMenu = new JMenu("Help");
+        myBoardPanel = theBoardPanel;
+        myTimer = theTimer;
+        myNewGame = new JMenuItem("New Game");
+        myEndGame = new JMenuItem("End Game");
+        myBlindMode = new JCheckBoxMenuItem("Blind Mode");
+        
+        setupComponents();
+    }
+    
+    /**
+     * 
+     */
+    private void setupComponents() {
+        createGameMenu();
+        createOptionsMenu();
+        createHelpMenu();
+    }
+    
+    /**
+     * 
+     */
+    private void createGameMenu() {
+        myNewGame.setEnabled(false);
+        myNewGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.newGame();
+                myBoardPanel.setGameOver(false);
+                myBoardPanel.repaint();
+                myEndGame.setEnabled(true);
+                myNewGame.setEnabled(false);
+                myTimer.restart();
+            }
+        });
+        
+        myEndGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.setGameOver(true);
+                myBoardPanel.repaint();
+                myNewGame.setEnabled(true);
+                myEndGame.setEnabled(false);
+                myTimer.stop();
+            }
+        });
+        
+        myGameMenu.add(myNewGame);
+        myGameMenu.add(myEndGame);
+        
+        add(myGameMenu);
+    }
+    
+    /**
+     * 
+     */
+    private void createOptionsMenu() {
+        final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+        grid.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.setGridDisplay(grid.isSelected());
+                myBoardPanel.repaint();
+            }
+        });
+        
+        final JCheckBoxMenuItem background = new JCheckBoxMenuItem("Toggle Background Image");
+        background.setSelected(true);
+        background.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.setDrawBackground(background.isSelected());
+                myBoardPanel.repaint();
+            }
+        });
+        
+        myOptionsMenu.add(grid);
+        myOptionsMenu.add(background);
+        
+        add(myOptionsMenu);
+    }
+    
+    /**
+     * 
+     */
+    private void createHelpMenu() {
+        final JMenuItem scoring = new JMenuItem("Scoring System");
+        scoring.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                String message = SCORING_SYSTEM;
+                for (int i = 0; i < ScorePanel.LEVELS.length; i++) {
+                    message += ScorePanel.LEVELS[i] + " points for level "
+                            + (i + 1) + "\n";
+                }
+                JOptionPane.showMessageDialog(null, message);
+            }
+        });
+        
+        myHelpMenu.add(scoring);
+        
+        add(myHelpMenu);
+    }
+    
+    /**
+     * 
+     * @param theNextPiecePanel 
+     */
+    public void setupBlindMode(final NextPiecePanel theNextPiecePanel) {
+        myBlindMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoardPanel.setBlindMode(myBlindMode.isSelected());
+                theNextPiecePanel.setBlindMode(myBlindMode.isSelected());
+                myBoardPanel.repaint();
+                theNextPiecePanel.repaint();
+            }
+        });
+        myOptionsMenu.add(myBlindMode);
+
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void update(final Observable theObservable, final Object theChange) {
+        if (((Board) theObservable).isGameOver()) {
+            myEndGame.setEnabled(false);
+            myNewGame.setEnabled(true);
+        }
+    }
+}

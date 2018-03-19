@@ -1,0 +1,175 @@
+/*
+ * 
+ */
+
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import controller.AbstractTetrisAction;
+import model.Board;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+public class TetrisGUI implements Observer {
+    
+    /**
+     * The Toolkit for the window.
+     */
+    private static final Toolkit KIT = Toolkit.getDefaultToolkit();
+    
+    /**
+     * The Dimension of the screen.
+     */
+    private static final Dimension SCREEN_SIZE = KIT.getScreenSize();
+    
+    /**
+     * The width of the screen.
+     */
+    private static final int SCREEN_WIDTH = SCREEN_SIZE.width;
+    
+    /**
+     * The height of the screen.
+     */
+    private static final int SCREEN_HEIGHT = SCREEN_SIZE.height;
+    
+    /**
+     * The default size of the GUI.
+     */
+    private static final Dimension FRAME_SIZE = new Dimension(500, 600);
+    
+    /**
+     * 
+     */
+    private static final int INITIAL_TIME_DELAY = 500;
+    
+    /**
+     * 
+     */
+    private Board myBoard;
+    
+    /**
+     * 
+     */
+    private Timer myTimer;
+    
+    /**
+     * 
+     */
+    private final JFrame myFrame;
+    
+    /**
+     * 
+     */
+    private final TetrisBoardPanel myBoardPanel;
+    
+    /**
+     * 
+     */
+    private NextPiecePanel myNextPiecePanel;
+    
+    /**
+     * 
+     */
+    private Map<AbstractTetrisAction, String> myKeyBindings;
+    
+    /**
+     * 
+     */
+    public TetrisGUI() {
+        myFrame = new JFrame("TCSS 305: Tetris");
+        myBoard = new Board();
+        myBoardPanel = new TetrisBoardPanel(myBoard);
+        myNextPiecePanel = new NextPiecePanel(myBoard.getNextPiece());
+        myKeyBindings = new HashMap<AbstractTetrisAction, String>();
+        
+        start();
+    }
+    
+    /**
+     * 
+     */
+    private void initializeKeyMappings() {
+//        myKeyBindings.put(new LeftAction("LEFT"), "left");
+    }
+    
+    /**
+     * 
+     */
+    private void setupComponents() {
+        myTimer = new Timer(INITIAL_TIME_DELAY, new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                myBoard.step();
+            }
+        });
+        
+        final JPanel infoPanel = new JPanel();
+        
+        final JPanel controlsPanel = new JPanel();
+        controlsPanel.setPreferredSize(new Dimension(150, 250));
+        controlsPanel.setBackground(Color.YELLOW);
+        
+        final Box westBox = new Box(BoxLayout.PAGE_AXIS);
+        westBox.add(myNextPiecePanel);
+        westBox.add(Box.createVerticalStrut(200));
+        westBox.add(controlsPanel);
+        infoPanel.add(westBox);
+        
+        final JPanel centerPanel = new JPanel();
+        centerPanel.add(myBoardPanel);
+        myFrame.add(centerPanel, BorderLayout.CENTER);
+        myFrame.add(infoPanel, BorderLayout.WEST);
+        
+        myBoard.addObserver(this);
+    }
+    
+    /**
+     * 
+     */
+    public void start() {
+        initializeKeyMappings();
+        setupComponents();
+        
+        myFrame.pack();
+        myFrame.setIconImage(new ImageIcon("./icons/tetris.jpg").getImage());
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setLocation(SCREEN_WIDTH / 2 - myFrame.getWidth() / 2,
+                    SCREEN_HEIGHT / 2 - myFrame.getHeight() / 2);
+        myFrame.setVisible(true);
+        myTimer.start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void update(final Observable theObservable, final Object theChange) {
+        myBoardPanel.repaint();
+        myNextPiecePanel.repaint();
+        if (myBoard.isGameOver()) {
+            myTimer.stop();
+        }
+        if (!myNextPiecePanel.getNextPiece().equals(myBoard.getNextPiece())) {
+            myNextPiecePanel.setNextPiece(myBoard.getNextPiece());
+        }
+    }
+}

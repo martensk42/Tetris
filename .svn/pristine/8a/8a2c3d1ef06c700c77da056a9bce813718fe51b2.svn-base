@@ -1,0 +1,45 @@
+/*
+ * 
+ */
+
+package view;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+public class TetrisKeyListener implements KeyListener {
+    
+    /**
+     * 
+     */
+    public TetrisKeyListener() {
+        
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void keyPressed(final KeyEvent theEvent) {
+        
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void keyReleased(final KeyEvent theEvent) {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void keyTyped(final KeyEvent theEvent) {
+    }
+
+}

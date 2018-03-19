@@ -1,0 +1,36 @@
+/*
+ * 
+ */
+package Controller;
+
+import java.awt.event.ActionEvent;
+
+import model.Board;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class LeftAction extends AbstractTetrisAction {
+    
+    /**
+     * 
+     */
+    private Board myBoard;
+    
+    /**
+     * 
+     * @param theName 
+     * @param theBoard 
+     */
+    public LeftAction(final String theName, final Board theBoard) {
+        super(theName);
+        myBoard = theBoard;
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent theEvent) {
+        myBoard.moveLeft();
+    }
+}

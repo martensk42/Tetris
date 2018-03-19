@@ -1,0 +1,128 @@
+/*
+ * 
+ */
+
+package view;
+
+import java.awt.Color;
+import java.awt.GridLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+/**
+ * @author Kyle Martens
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public class ScorePanel extends JPanel {
+    
+    /**
+     * 
+     */
+    private static final int SCORE_DYNAMICS = 3;
+    
+    /**
+     * 
+     */
+    private static final int SCORE_COLUMNS = 2;
+    
+    /**
+     * 
+     */
+    private static final int[] LEVELS = {100, 250, 500, 750};
+    
+    /**
+     * 
+     */
+    private static final int LEVEL_MODIFIER = 10;
+    
+    /**
+     * 
+     */
+    private static final double TIMER_DECREMENT = .75;
+    
+    /**
+     * 
+     */
+    private JLabel myScore;
+    
+    /**
+     * 
+     */
+    private JLabel myClearedLines;
+    
+    /**
+     * 
+     */
+    private JLabel myLevel;
+    
+    /**
+     * 
+     * @param theScore 
+     * @param theClearedLines 
+     * @param theLevel 
+     */
+    public ScorePanel(final int theScore, final int theClearedLines, final int theLevel) {
+        super();
+        myScore = new JLabel(String.valueOf(theScore), JLabel.CENTER);
+        myClearedLines = new JLabel(String.valueOf(theClearedLines), JLabel.CENTER);
+        myLevel = new JLabel(String.valueOf(theLevel), JLabel.CENTER);
+        setLayout(new GridLayout(SCORE_DYNAMICS, SCORE_COLUMNS, 0, 0));
+        
+        setupComponents();
+    }
+    
+    /**
+     * 
+     */
+    private void setupComponents() {
+        add(new JLabel("Score"));
+        add(myScore);
+        add(new JLabel("Lines Cleared"));
+        add(myClearedLines);
+        add(new JLabel("Level"));
+        add(myLevel);
+        
+        setBorder(BorderFactory.createTitledBorder("Score:"));
+        setBackground(Color.WHITE);
+        
+    }
+    
+    /**
+     * 
+     * @param theClearedLines 
+     * @param theTimer 
+     */
+    public void updateScore(final int theClearedLines, final Timer theTimer) {
+        final int curLines = Integer.valueOf(myClearedLines.getText());
+        int curScore = Integer.valueOf(myScore.getText());
+        int curLevel = Integer.valueOf(myLevel.getText());
+        
+        curScore += curLevel * theClearedLines * LEVEL_MODIFIER;
+        final int index = (curLevel - 1) % LEVELS.length;
+        if (LEVELS[index] * Math.pow(LEVEL_MODIFIER,
+                                     (curLevel - 1) / LEVELS.length) <= curScore) {
+            curLevel++;
+            theTimer.setDelay((int) Math.round(theTimer.getDelay() * TIMER_DECREMENT));
+        }
+        
+        updateText(myScore, curScore);
+        updateText(myClearedLines, curLines + theClearedLines);
+        updateText(myLevel, curLevel);
+        
+    }
+    
+    /**
+     * 
+     * @param theLabel 
+     * @param theChange 
+     */
+    private void updateText(final JLabel theLabel, final int theChange) {
+        theLabel.setText(String.valueOf(theChange));
+    }
+    
+    
+}
